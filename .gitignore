@@ -1,0 +1,15 @@
+Tagshop/.classpath
+Tagshop/.project
+Tagshop/.springBeans
+Tagshop/.settings/
+Tagshop/target/
+Tagshop/src/main/resources/db.properties
+Tagshop/.gitignore
+*.properties
+*.json
+*.txt
+*.sql
+*.bak
+*.mwb
+*.xlsm
+*.zip

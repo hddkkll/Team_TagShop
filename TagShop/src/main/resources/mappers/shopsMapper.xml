@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ShopsDao">
+
+	<select id="getSellerList" resultType="vo.ProductsVo"> 
+		SELECT * FROM PRODUCTS
+	</select>
+
+	<insert id="sellerRegister" parameterType="vo.ShopsVo">
+		INSERT INTO shops
+		(shopid, corporateName, corporateRegisterNumber,
+		brandName,phone,bankAccount,bankCode,createDate,updateDate, enabled,
+		userid)
+		VALUES (#{shopid},
+		#{corporateName},#{corporateRegisterNumber},#{brandName},#{phone},#{bankAccount},#{bankCode},NOW(),
+		NOW(), true, #{userid})
+	</insert>
+
+	<insert id="insertCategories"
+		parameterType="vo.SelectedCategoriesVo">
+		INSERT INTO SelectedCategories (shopid,
+		largeCategoryCode)
+		VALUES (#{shopid}, #{largeCategoryCode})
+	</insert>
+
+	<insert id="productsRegister" parameterType="vo.ProductsVo">
+		INSERT INTO Products
+		(title, description, price, photoFile, smallCategoryCode, CreateDate,
+		UpdateDate, shopid)
+		VALUES
+		(#{title},#{description},#{price},#{photoFile},#{smallCategoryCode},NOW(),
+		NOW(),#{shopid})
+	</insert>
+
+	<insert id="productItemRegister">
+		<selectKey order="BEFORE" keyProperty="productid"
+			resultType="BigInteger">
+			SELECT MAX(productid) FROM Products
+		</selectKey>
+		INSERT INTO ProductItem (productid, productName, unitPrice)
+		VALUES
+		(#{productid},#{productName},#{unitPrice})
+	</insert>
+
+	<insert id="optionsSize">
+		<selectKey order="BEFORE" keyProperty="productItemid"
+			resultType="BigInteger">
+			SELECT MAX(productItemid) FROM ProductItem
+		</selectKey>
+		INSERT INTO Options (productItemid, optionType, OptionCode)
+		VALUES
+		(#{productItemid},'SIZE',#{optionCode})
+	</insert>
+
+	<insert id="optionsColor">
+		<selectKey order="BEFORE" keyProperty="productItemid"
+			resultType="BigInteger">
+			SELECT MAX(productItemid) FROM ProductItem
+		</selectKey>
+		INSERT INTO Options (productItemid, optionType, optionCode)
+		VALUES
+		(#{productItemid},'COLOR',#{optionCode2})
+	</insert>
+
+	<select id="productCategories" resultType="vo.ProductsVo">
+		SELECT
+		shopid,title,price,productid,photoFile FROM Products
+	</select>
+
+	<select id="productOrderBy" parameterType="HashMap"
+		resultType="vo.ProductsVo">
+		SELECT shopid,title,price,productid,photoFile, productid FROM Products
+		<if test="column.equals('productidDesc')">
+			order by productid desc
+		</if>
+		<if test="column.equals('priceDesc')">
+			order by price desc
+		</if>
+		<if test="column.equals('priceAsc')">
+			order by price asc
+		</if>
+
+	</select>
+
+	<select id="smallCategories" parameterType="HashMap"
+		resultType="vo.ProductsVo">
+		SELECT shopid,title,price,productid, productid,photoFile
+		FROM Products where smallCategoryCode = #{code}
+	</select>
+
+	<select id="productDetail" resultType="vo.ProductDetailVo">
+		SELECT P.shopid, I.ProductName, I.UnitPrice, I.ProductItemid,P.PhotoFile
+		FROM Products P JOIN ProductItem I
+		ON P.productid = I.productid
+		WHERE I.productid = #{productid};
+	</select>
+	
+ 	<select id="getOptions" resultType="vo.OptionsVo">
+		SELECT O.OPTIONTYPE, O.OPTIONCODE
+		FROM OPTIONS O JOIN (SELECT I.PRODUCTITEMID
+							FROM Products P JOIN ProductItem I ON P.productid = I.productid
+							WHERE I.productid = #{productid}) PI ON O.PRODUCTITEMID = PI.PRODUCTITEMID;
+	</select>
+	
+	<select id="getOption" resultType="vo.OptionsVo">
+		SELECT OPTIONTYPE, OPTIONCODE FROM OPTIONS WHERE PRODUCTITEMID = #{productItemid}
+	</select>
+	
+	<delete id="deleteSelectedOption">
+		DELETE FROM SELECTEDOPTION WHERE BUYITEMSID = #{buyItemsId}
+	</delete>
+	
+	<delete id="deleteBuyItems">
+		DELETE FROM BUYITEMS WHERE BUYITEMSID = #{buyItemsId}
+	</delete>
+	
+	<select id="getCategories" resultType="vo.CategoriesVo">
+		SELECT * FROM categories
+	</select>
+	
+	<select id="checkname" resultType="Integer">
+		SELECT COUNT(*) AS CNT FROM SHOPS WHERE SHOPID = #{name};
+	</select>
+ </mapper>
